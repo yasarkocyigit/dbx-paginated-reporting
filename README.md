@@ -1,101 +1,62 @@
-# Paginated Reporting
+<p align="center">
+  <img src="https://img.shields.io/badge/Databricks-Native-FF3621?style=for-the-badge&logo=databricks&logoColor=white" alt="Databricks Native" />
+  <img src="https://img.shields.io/badge/Unity_Catalog-Metadata_Driven-00A1E0?style=for-the-badge" alt="Unity Catalog" />
+  <img src="https://img.shields.io/badge/AI_Assistant-Model_Serving-C97539?style=for-the-badge" alt="AI Assistant" />
+</p>
 
-Enterprise-style, Databricks-native paginated reporting platform for metadata-driven report development, runtime validation, and controlled PDF export.
+<h1 align="center">dbx-paginated-reporting</h1>
 
-## Overview
+<p align="center">
+  <strong>Enterprise-style paginated reporting on Databricks with Designer + HTML authoring, runtime parameter filtering, and PDF export.</strong>
+  <br />
+  FastAPI &bull; Vue 3 &bull; Lakebase &bull; Unity Catalog &bull; Databricks SQL
+</p>
 
-This project provides a full report lifecycle in one application:
-- data discovery from Unity Catalog
-- structure modeling and query generation
-- template authoring (Designer mode and Advanced HTML mode)
-- runtime parameterized preview against real warehouse data
-- paginated PDF export
-- AI-assisted report development through Databricks Model Serving
+<p align="center">
+  <a href="#quick-start">Quick Start</a> &bull;
+  <a href="#how-it-works">How It Works</a> &bull;
+  <a href="#repository-structure">Structure</a> &bull;
+  <a href="#api-surface">API</a> &bull;
+  <a href="#troubleshooting">Troubleshooting</a>
+</p>
 
-The goal is to deliver an SSRS-like workflow with a modern, cloud-native, Databricks-first implementation.
+---
 
-## Key Capabilities
+## The Problem
 
-### Data and Metadata
-- Unity Catalog drill-down discovery (`catalog -> schema -> table -> columns`)
-- structure definitions persisted in Lakebase
-- inferred field graph (including nested fields)
-- reusable metadata layer across templates
+Most paginated reporting workflows are fragmented across multiple tools and manual steps. Teams need to:
+- discover source data
+- define repeatable metadata
+- build templates with business logic
+- validate runtime filters against real data
+- export consistent print/PDF outputs
 
-### Report Authoring
-- `Designer` mode for metadata-driven report composition
-- `HTML` mode for full Mustache + HTML control
-- reusable snippet insertion for common report blocks
-- automatic template save behavior with guarded template switching
+This project solves that end-to-end in a single Databricks-aligned application.
 
-### Preview and Export
-- runtime parameter overrides
-- backend-applied query filters, grouping, and sorting
-- query trace/debug visibility in preview
-- paginated rendering and production-style PDF export
+## What This Project Delivers
 
-### AI Assistant
-- REST and WebSocket chat endpoints
-- optional template-aware context prompt
-- powered by Databricks Model Serving endpoint
+| Capability | Description |
+|---|---|
+| **Unity Catalog Discovery** | Browse catalogs, schemas, tables, and columns through API-backed explorer flows |
+| **Metadata Structures** | Persist report data structures in Lakebase and infer fields from selected sources |
+| **Dual Authoring Modes** | Build reports in `Designer` mode or `HTML` advanced mode with Mustache syntax |
+| **Runtime Filter Testing** | Apply parameters in preview and execute backend-filtered Databricks SQL queries |
+| **Paginated PDF Export** | Render and export print-ready reports with configurable page setup |
+| **AI-Assisted Development** | Use chat endpoints backed by Databricks Model Serving for report assistance |
 
-## Architecture
+---
 
-### Backend
-- FastAPI service layer
-- repositories over Lakebase (PostgreSQL)
-- Databricks SQL connector for data retrieval
-- Databricks SDK for workspace integrations
-- model-serving connector for AI assistant
-
-### Frontend
-- Vue 3 + TypeScript + Vite
-- TanStack Query for server-state APIs
-- Pinia for local view state
-- CodeMirror-based editor experience
-- Mustache rendering pipeline
-
-## Repository Structure
-
-```text
-back-end/
-  app.py
-  common/
-    config.py
-    connectors/
-    factories/
-  migrations/
-  models/
-  repositories/
-  routes/v1/
-  services/
-  static/
-
-front-end/
-  src/
-    api/
-    components/
-    stores/
-    utils/
-    views/
-  vite.config.ts
-  orval.config.ts
-
-examples/
-  general_ledger_all_features_template.html
-  general_ledger_ssrs_demo_template.html
-```
-
-## Local Development
+## Quick Start
 
 ### Prerequisites
+
 - Python `3.11+`
 - Node.js `18+`
 - npm `9+`
 - Databricks workspace access
-- Lakebase and SQL Warehouse credentials
+- configured SQL warehouse and Lakebase credentials
 
-### Start Backend
+### 1) Start Backend
 
 ```bash
 cd back-end
@@ -103,7 +64,7 @@ pip install -r requirements.txt
 uvicorn app:app --reload --port 8012
 ```
 
-### Start Frontend
+### 2) Start Frontend
 
 ```bash
 cd front-end
@@ -111,40 +72,100 @@ npm install
 VITE_API_PROXY_TARGET=http://127.0.0.1:8012 npm run dev -- --port 5180
 ```
 
-Application URL:
-- `http://localhost:5180`
+### 3) Open Application
 
-## Configuration
+- [http://localhost:5180](http://localhost:5180)
 
-See `back-end/.env.example` for the full set. Primary variables:
+---
+
+## How It Works
+
+```mermaid
+flowchart LR
+    A[Unity Catalog Discovery] --> B[Structure Build]
+    B --> C[Template Authoring]
+    C --> D[Runtime Preview]
+    D --> E[PDF Export]
+    C --> F[AI Assistant]
+    F --> C
+```
+
+### Flow
+
+1. **Discovery**: select source data from Unity Catalog.
+2. **Structure Build**: infer fields and persist structure/query metadata.
+3. **Template Authoring**: design report layout in Designer or HTML mode.
+4. **Preview**: test parameters and backend filters on real data.
+5. **Export**: generate full paginated PDF output.
+
+---
+
+## Architecture
+
+### Backend
+
+- FastAPI (`back-end/app.py`)
+- repository layer over Lakebase/PostgreSQL
+- Databricks SQL connector for data execution
+- Model Serving connector for AI chat
+- route modules for structures, templates, discovery, and agent
+
+### Frontend
+
+- Vue 3 + TypeScript + Vite
+- TanStack Query for API state
+- Pinia for view state (`active template/structure`)
+- CodeMirror editor for advanced template editing
+- Mustache-based render pipeline
+
+---
+
+## Repository Structure
+
+```text
+dbx-paginated-reporting/
+├── back-end/
+│   ├── app.py
+│   ├── common/
+│   │   ├── config.py
+│   │   ├── connectors/
+│   │   └── factories/
+│   ├── migrations/
+│   ├── models/
+│   ├── repositories/
+│   ├── routes/v1/
+│   ├── services/
+│   └── static/
+├── front-end/
+│   ├── src/
+│   │   ├── api/
+│   │   ├── components/
+│   │   ├── stores/
+│   │   ├── utils/
+│   │   └── views/
+│   ├── vite.config.ts
+│   └── orval.config.ts
+└── examples/
+    ├── general_ledger_all_features_template.html
+    └── general_ledger_ssrs_demo_template.html
+```
+
+---
+
+## Environment Configuration
+
+Primary backend variables (see `back-end/.env.example` for complete reference):
+
 - `DATABRICKS_HOST`
-- `DATABRICKS_TOKEN` (or OAuth equivalents)
+- `DATABRICKS_TOKEN` (or OAuth credentials)
 - `DATABRICKS_WAREHOUSE_ID` or `DATABRICKS_WAREHOUSE_PATH`
 - `LAKEBASE_INSTANCE_NAME`
 - `LAKEBASE_DATABASE_NAME`
 - `MODEL_SERVING_ENDPOINT` (default fallback: `databricks-claude-sonnet-4-6`)
 
-## Product Workflow
+---
 
-### 1) Data Structures
-- create structure
-- select source table(s)
-- build and infer fields
-- persist generated query metadata
-
-### 2) Template Editor
-- create/select template
-- choose `Designer` or `HTML` authoring mode
-- edit with live preview support
-- save metadata and layout updates
-
-### 3) Preview and Export
-- select template
-- apply runtime parameters
-- validate filter behavior in debug view
-- export full paginated PDF
-
-## API Surface (Core)
+## API Surface
 
 ### Structures
 - `GET /api/v1/structures/`
@@ -163,63 +184,56 @@ See `back-end/.env.example` for the full set. Primary variables:
 - `POST /api/v1/agent/chat`
 - `WS /api/v1/agent/ws`
 
-## Data Rendering Contract
+---
 
-Template render payload uses a `rows` collection. Example:
+## Rendering Contract
+
+Template rendering uses a `rows` array payload.
 
 ```json
 {
   "rows": [
-    { "txn_id": "TXN-1", "department": "FIN", "_index": 1, "_total": 2 },
-    { "txn_id": "TXN-2", "department": "OPS", "_index": 2, "_total": 2 }
+    { "txn_id": "TXN-1001", "department": "FIN", "_index": 1, "_total": 2 },
+    { "txn_id": "TXN-1002", "department": "OPS", "_index": 2, "_total": 2 }
   ]
 }
 ```
 
-Supported patterns:
+Supported examples:
 - scalar: `{{field}}`
-- list section: `{{#rows}}...{{/rows}}`
+- list: `{{#rows}} ... {{/rows}}`
 - object path: `{{customer.name}}`
-- nested list: `{{#line_items}}...{{/line_items}}`
+- nested list: `{{#line_items}} ... {{/line_items}}`
 
-## Quality and Safety Notes
+---
 
-To prevent template cross-write issues during fast switching:
-- autosave is guarded with template snapshot checks
-- stale async save requests are ignored
-- template IDs remain stable UUID references
+## Reliability Notes
 
-Recommended next hardening step for multi-user concurrency:
-- optimistic locking on update (`version` or `updated_at` checks)
+To prevent template cross-write during fast switching:
+- autosave uses template snapshot guards
+- stale async save requests are discarded
+- template identity remains UUID-based
 
-## Regenerate Frontend API Client
+Recommended enterprise hardening:
+- optimistic locking on template update (`version` or `updated_at` check)
 
-```bash
-cd front-end
-npm run generate-all
-```
-
-With custom OpenAPI URL:
-
-```bash
-cd front-end
-OPENAPI_URL=http://127.0.0.1:8012/openapi.json npm run generate-all
-```
+---
 
 ## Troubleshooting
 
-### UI runs but API calls fail
+### Frontend loads but API calls fail
 - verify backend is running on expected port
-- verify `VITE_API_PROXY_TARGET` points to backend URL
+- verify `VITE_API_PROXY_TARGET` points to backend
 
-### Preview shows no rows
-- validate structure query
-- validate selected fields
-- validate runtime parameters and applied filters
+### Preview returns empty rows
+- validate structure query and selected columns
+- check runtime filters in Preview debug panel
 
 ### Host mismatch (`localhost` vs `127.0.0.1`)
-- use the exact host printed by Vite in local startup logs
+- use the host shown by Vite startup logs
 
-## License
+---
 
-Internal/demo use unless explicitly licensed otherwise.
+<p align="center">
+  Built for Databricks-native reporting workflows.
+</p>
