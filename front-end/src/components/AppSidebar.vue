@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { useDataStructuresStore } from '@/stores/dataStructures'
 import { useTemplatesStore } from '@/stores/templates'
-import { useListStructuresApiV1StructuresGet, useListTemplatesApiV1TemplatesGet } from '@/api/generated'
+import { useListStructuresApiV1StructuresGet, useListTemplatesApiV1TemplatesGet } from '@/api/client'
 import { useRouter, useRoute } from 'vue-router'
 
 defineProps<{
@@ -242,7 +242,8 @@ function insertComponent(snippet: string) {
       <i :class="['bi', collapsed ? 'bi-chevron-right' : 'bi-chevron-left']"></i>
     </button>
 
-    <div id="sidebar-content" class="sidebar-content" v-show="!collapsed">
+    <div class="sidebar-inner">
+      <div id="sidebar-content" class="sidebar-content" v-show="!collapsed">
       <!-- HOME PAGE: Quick Links -->
       <template v-if="currentPage === 'home'">
         <div class="sidebar-section">
@@ -406,6 +407,7 @@ function insertComponent(snippet: string) {
         <i class="bi bi-file-earmark-pdf"></i>
       </button>
     </div>
+    </div>
   </aside>
 </template>
 
@@ -418,28 +420,38 @@ function insertComponent(snippet: string) {
   width: 56px !important;
 }
 
+.sidebar-inner {
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  /* Scrollbar - Micro */
+  scrollbar-width: thin;
+}
+
 .sidebar-toggle {
   position: absolute;
-  top: 12px;
-  right: -12px;
+  top: 16px;
+  right: -14px;
   width: 24px;
   height: 24px;
   border-radius: 50%;
-  background: white;
-  border: 1px solid #dee2e6;
+  background: var(--ep-bg-surface);
+  border: 1px solid var(--ep-border-base);
+  color: var(--ep-text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  z-index: 10;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  transition: all 0.2s ease;
+  z-index: 100;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: all var(--trans-fast);
 }
 
 .sidebar-toggle:hover {
-  background: var(--pr-info);
-  color: white;
-  border-color: var(--pr-info);
+  background: var(--ep-bg-surface-hover);
+  color: var(--ep-text-primary);
+  border-color: var(--ep-border-strong);
+  transform: scale(1.1);
 }
 
 .sidebar-content {
@@ -455,22 +467,23 @@ function insertComponent(snippet: string) {
 }
 
 .collapsed-icon-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
-  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--ep-radius-sm);
+  border: 1px solid transparent;
   background: transparent;
-  color: #495057;
+  color: var(--ep-text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all var(--trans-fast);
 }
 
 .collapsed-icon-btn:hover {
-  background: var(--pr-info);
-  color: white;
+  background: var(--ep-bg-surface-hover);
+  color: var(--ep-text-primary);
+  border-color: var(--ep-border-base);
 }
 
 .collapsed-icon-btn i {
@@ -486,13 +499,17 @@ function insertComponent(snippet: string) {
   background: transparent;
   text-align: left;
   cursor: pointer;
-  transition: all 0.2s ease;
-  border-radius: 6px;
-  margin-bottom: 0.25rem;
+  transition: all var(--trans-fast);
+  border-radius: var(--ep-radius-sm);
+  margin-bottom: 4px;
+  font-weight: 500;
+  color: var(--ep-text-secondary);
+  font-size: var(--ep-text-sm);
 }
 
 .nav-btn:hover {
-  background: #f0f4f8;
+  background: var(--ep-bg-surface-hover);
+  color: var(--ep-text-primary);
 }
 
 .structure-list-item {
@@ -500,19 +517,22 @@ function insertComponent(snippet: string) {
   align-items: center;
   padding: 0.6rem 0.75rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-  border-radius: 6px;
-  margin: 0.25rem 0.5rem;
-  font-size: 0.875rem;
+  transition: all var(--trans-fast);
+  border-radius: var(--ep-radius-sm);
+  margin: 4px 8px;
+  font-size: var(--ep-text-sm);
+  font-weight: 500;
+  color: var(--ep-text-secondary);
 }
 
 .structure-list-item:hover {
-  background: #f0f4f8;
+  background: var(--ep-bg-surface-hover);
+  color: var(--ep-text-primary);
 }
 
 .structure-list-item.active {
-  background: var(--pr-info);
-  color: white;
+  background: var(--ep-bg-dark);
+  color: var(--ep-text-inverse);
 }
 
 .structure-list-item.active .badge {
@@ -528,22 +548,22 @@ function insertComponent(snippet: string) {
 }
 
 .template-list-item {
-  padding: 0.6rem 0.75rem;
+  padding: 8px 12px;
   cursor: pointer;
-  transition: all 0.2s ease;
-  border-radius: 6px;
-  margin: 0.25rem 0.5rem;
+  transition: all var(--trans-fast);
+  border-radius: var(--ep-radius-sm);
+  margin: 4px 8px;
   border: 1px solid transparent;
 }
 
 .template-list-item:hover {
-  background: #f0f4f8;
-  border-color: #e0e0e0;
+  background: var(--ep-bg-surface-hover);
+  border-color: var(--ep-border-base);
 }
 
 .template-list-item.active {
-  background: #e3f2fd;
-  border-color: var(--pr-info);
+  background: var(--ep-bg-surface-active);
+  border-color: var(--ep-border-strong);
 }
 
 .template-info {
@@ -554,17 +574,17 @@ function insertComponent(snippet: string) {
 }
 
 .template-structure {
-  font-size: 0.7rem;
-  color: #6c757d;
-  margin-top: 0.25rem;
-  margin-left: 1.5rem;
+  font-size: var(--ep-text-xs);
+  color: var(--ep-text-tertiary);
+  margin-top: 4px;
+  margin-left: 24px;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  gap: 4px;
 }
 
 .template-list-item.active .template-structure {
-  color: var(--pr-info);
+  color: var(--ep-text-secondary);
 }
 
 .component-btn {
@@ -576,15 +596,16 @@ function insertComponent(snippet: string) {
   background: white;
   text-align: left;
   cursor: pointer;
-  transition: all 0.2s ease;
-  border-radius: 6px;
-  margin-bottom: 0.4rem;
+  transition: all var(--trans-fast);
+  border-radius: var(--ep-radius-sm);
+  margin-bottom: 6px;
+  box-shadow: var(--ep-shadow-sm);
 }
 
 .component-btn:hover {
-  background: var(--pr-info);
-  color: white;
-  border-color: var(--pr-info);
+  background: var(--ep-bg-surface-hover);
+  color: var(--ep-text-primary);
+  border-color: var(--ep-border-strong);
 }
 
 .component-info {
@@ -593,17 +614,14 @@ function insertComponent(snippet: string) {
 
 .component-name {
   font-weight: 500;
-  font-size: 0.8rem;
+  font-size: var(--ep-text-sm);
+  color: var(--ep-text-primary);
 }
 
 .component-desc {
-  font-size: 0.65rem;
-  color: #6c757d;
-  margin-top: 1px;
-}
-
-.component-btn:hover .component-desc {
-  color: rgba(255, 255, 255, 0.8);
+  font-size: var(--ep-text-xs);
+  color: var(--ep-text-tertiary);
+  margin-top: 2px;
 }
 
 .export-info {

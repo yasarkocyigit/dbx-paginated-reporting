@@ -5,7 +5,13 @@ from fastapi import APIRouter, HTTPException, Query, Request
 
 from common.factories.cache import app_cache
 from common.logger import log as L
-from models.template import Template, TemplateCreate, TemplateUpdate
+from models.template import (
+    ParameterOptionsRequest,
+    PreviewDataRequest,
+    Template,
+    TemplateCreate,
+    TemplateUpdate,
+)
 from repositories.templates import TemplatesRepository
 from services.data_query import DataQueryService
 
@@ -74,15 +80,55 @@ async def delete_template(template_id: UUID):
 
 
 @router.post("/{template_id}/preview-data", response_model=Dict[str, Any])
-async def preview_data(template_id: UUID, request: Request, limit: int = Query(50, ge=1, le=1000)):
+async def preview_data(
+    template_id: UUID,
+    request: Request,
+    body: Optional[PreviewDataRequest] = None,
+    limit: int = Query(50, ge=1, le=5000),
+):
     """Query real data from the linked structure's SQL query, limited for preview."""
     try:
+        effective_limit = body.limit if body else limit
+        effective_offset = body.offset if body else 0
+        filters = body.filters if body else []
         svc = DataQueryService(token=request.headers.get("x-forwarded-access-token"))
-        return await svc.execute_for_preview(template_id, limit=limit)
+        return await svc.execute_for_preview(
+            template_id,
+            limit=effective_limit,
+            offset=effective_offset,
+            filters=filters,
+            group_by=body.group_by if body else None,
+            sorts=body.sorts if body else [],
+        )
     except ValueError as e:
-        raise HTTPException(status_code=404, detail=str(e))
+        message = str(e)
+        if message in {"Template not found", "Linked structure not found"}:
+            raise HTTPException(status_code=404, detail=message)
+        raise HTTPException(status_code=400, detail=message)
     except Exception:
         L.exception("Failed to execute preview data query")
         raise HTTPException(status_code=502, detail="Failed to query data")
 
 
+@router.post("/{template_id}/parameter-options", response_model=Dict[str, Any])
+async def parameter_options(
+    template_id: UUID,
+    request: Request,
+    body: ParameterOptionsRequest,
+):
+    try:
+        svc = DataQueryService(token=request.headers.get("x-forwarded-access-token"))
+        return await svc.get_distinct_values_for_template(
+            template_id=template_id,
+            field=body.field,
+            filters=body.filters,
+            limit=body.limit,
+        )
+    except ValueError as e:
+        message = str(e)
+        if message in {"Template not found", "Linked structure not found"}:
+            raise HTTPException(status_code=404, detail=message)
+        raise HTTPException(status_code=400, detail=message)
+    except Exception:
+        L.exception("Failed to fetch parameter options")
+        raise HTTPException(status_code=502, detail="Failed to fetch parameter options")

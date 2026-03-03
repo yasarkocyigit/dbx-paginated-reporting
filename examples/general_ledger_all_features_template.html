@@ -1,0 +1,391 @@
+<!-- DESIGNER_META_START
+{
+  "kind": "designer_v1",
+  "version": 1,
+  "title": "General Ledger Control Report",
+  "subtitle": "Consolidated Entity: Global Corp Inc.",
+  "periodLabel": "Period: Dec 2024",
+  "runDateField": "txn_date",
+  "accountGroupLabel": "Account Group: 5000 - Operating Expenses",
+  "showRowNumber": true,
+  "showGrandTotal": true,
+  "totalLabel": "GRAND TOTAL:",
+  "totalFields": ["debit_amount", "credit_amount"],
+  "footerLeft": "FINANCE CONTROLLERS PACK",
+  "footerCenter": "INTERNAL USE ONLY",
+  "footerRight": "Page {{page_number}} of {{total_pages}}",
+  "columns": [
+    { "key": "txn_date", "label": "Txn Date", "align": "left" },
+    { "key": "txn_id", "label": "Txn Id", "align": "left" },
+    { "key": "description", "label": "Description", "align": "left" },
+    { "key": "department", "label": "Department", "align": "left" },
+    { "key": "gl_code", "label": "GL Code", "align": "left" },
+    { "key": "debit_amount", "label": "Debit", "align": "right" },
+    { "key": "credit_amount", "label": "Credit", "align": "right" }
+  ],
+  "parameters": [
+    {
+      "label": "DEPT",
+      "value": "ALL",
+      "filterField": "department",
+      "filterOperator": "equals"
+    },
+    {
+      "label": "GL_PREFIX",
+      "value": "GL-",
+      "filterField": "gl_code",
+      "filterOperator": "starts_with"
+    },
+    {
+      "label": "ACCT_TEXT",
+      "value": "5000",
+      "filterField": "account_group",
+      "filterOperator": "contains"
+    },
+    {
+      "label": "TXN_IDS",
+      "value": "",
+      "filterField": "txn_id",
+      "filterOperator": "in"
+    },
+    {
+      "label": "MIN_DEBIT",
+      "value": "",
+      "filterField": "debit_amount",
+      "filterOperator": "gte"
+    }
+  ]
+}
+DESIGNER_META_END -->
+
+<style>
+  .gl-enterprise {
+    background: #ffffff;
+    width: 794px;
+    min-height: 1123px;
+    margin: 0 auto;
+    padding: 36px 40px;
+    border: 1px solid #d5d9e0;
+    box-sizing: border-box;
+    color: #0f172a;
+    font-family: "Segoe UI", Arial, sans-serif;
+    position: relative;
+  }
+
+  .gl-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    border-bottom: 2px solid #0f172a;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+    gap: 20px;
+  }
+
+  .gl-title {
+    margin: 0;
+    font-size: 40px;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+    color: #0f172a;
+  }
+
+  .gl-subtitle {
+    margin-top: 6px;
+    color: #64748b;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+
+  .gl-period {
+    font-size: 33px;
+    line-height: 1;
+    color: #1d4ed8;
+    font-weight: 800;
+  }
+
+  .gl-run {
+    margin-top: 8px;
+    color: #94a3b8;
+    font-size: 11px;
+    font-family: "Courier New", monospace;
+    text-align: right;
+  }
+
+  .param-grid {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 14px;
+    border: 1px solid #d1d5db;
+    background: #f8fafc;
+    padding: 10px;
+  }
+
+  .param-card {
+    border: 1px solid #e2e8f0;
+    background: #ffffff;
+    border-radius: 6px;
+    padding: 6px 8px;
+  }
+
+  .param-label {
+    color: #64748b;
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 3px;
+    font-weight: 700;
+  }
+
+  .param-value {
+    color: #0f172a;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: "Courier New", monospace;
+  }
+
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+
+  .kpi-card {
+    border: 1px solid #dbe3f1;
+    border-radius: 8px;
+    padding: 8px 10px;
+    background: linear-gradient(180deg, #ffffff 0%, #f8fbff 100%);
+  }
+
+  .kpi-label {
+    font-size: 10px;
+    letter-spacing: 0.08em;
+    color: #64748b;
+    text-transform: uppercase;
+    font-weight: 700;
+  }
+
+  .kpi-value {
+    margin-top: 4px;
+    font-size: 16px;
+    font-weight: 800;
+    color: #0f172a;
+    font-family: "Courier New", monospace;
+  }
+
+  .gl-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 12px;
+    margin-bottom: 14px;
+  }
+
+  .gl-table thead tr {
+    background: #1e293b;
+    color: #ffffff;
+  }
+
+  .gl-table th {
+    padding: 8px 6px;
+    border-bottom: 1px solid #111827;
+    text-align: left;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .gl-table th.num,
+  .gl-table td.num {
+    text-align: right;
+    font-family: "Courier New", monospace;
+  }
+
+  .gl-table td {
+    padding: 7px 6px;
+    border-bottom: 1px dashed #dbe3f1;
+    vertical-align: top;
+  }
+
+  .gl-table .group-row td {
+    font-style: italic;
+    font-weight: 700;
+    color: #475569;
+    background: #f8fafc;
+    border-bottom: 1px solid #cbd5e1;
+  }
+
+  .gl-table .grand-row td {
+    border-top: 2px solid #0f172a;
+    border-bottom: 3px double #0f172a;
+    background: #f8fafc;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .gl-table .grand-row .label-cell {
+    text-align: right;
+    letter-spacing: 0.06em;
+  }
+
+  .chart-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+
+  .chart-card {
+    border: 1px solid #dbe3f1;
+    border-radius: 8px;
+    padding: 8px;
+    background: #ffffff;
+  }
+
+  .chart-title {
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #475569;
+    margin-bottom: 4px;
+    font-weight: 700;
+  }
+
+  .report-bar-chart,
+  .report-pie-chart {
+    height: 160px;
+    width: 100%;
+  }
+
+  .gl-footer {
+    position: absolute;
+    left: 40px;
+    right: 40px;
+    bottom: 22px;
+    border-top: 1px solid #cbd5e1;
+    padding-top: 6px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: #64748b;
+    font-family: "Courier New", monospace;
+  }
+</style>
+
+<div class="report-page gl-enterprise">
+  <div class="gl-header">
+    <div>
+      <h1 class="gl-title">General Ledger Control Report</h1>
+      <div class="gl-subtitle">Consolidated Entity: Global Corp Inc.</div>
+    </div>
+    <div>
+      <div class="gl-period">Dec 2024</div>
+      <div class="gl-run">RUN: {{txn_date}}</div>
+    </div>
+  </div>
+
+  <div class="param-grid">
+    <div class="param-card">
+      <div class="param-label">Dept</div>
+      <div class="param-value">{{DEPT}}</div>
+    </div>
+    <div class="param-card">
+      <div class="param-label">GL Prefix</div>
+      <div class="param-value">{{GL_PREFIX}}</div>
+    </div>
+    <div class="param-card">
+      <div class="param-label">Account Text</div>
+      <div class="param-value">{{ACCT_TEXT}}</div>
+    </div>
+    <div class="param-card">
+      <div class="param-label">Txn Ids</div>
+      <div class="param-value">{{TXN_IDS}}</div>
+    </div>
+    <div class="param-card">
+      <div class="param-label">Min Debit</div>
+      <div class="param-value">{{MIN_DEBIT}}</div>
+    </div>
+  </div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Rows In Page</div>
+      <div class="kpi-value">{{_row_count}}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Total Debit</div>
+      <div class="kpi-value">{{_totals.debit_amount}}</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Total Credit</div>
+      <div class="kpi-value">{{_totals.credit_amount}}</div>
+    </div>
+  </div>
+
+  <table class="gl-table report-table">
+    <thead>
+      <tr>
+        <th class="num" style="width: 42px;">#</th>
+        <th style="width: 100px;">Txn Date</th>
+        <th style="width: 132px;">Txn Id</th>
+        <th>Description</th>
+        <th style="width: 120px;">Department</th>
+        <th style="width: 90px;">GL Code</th>
+        <th class="num" style="width: 115px;">Debit</th>
+        <th class="num" style="width: 115px;">Credit</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr class="group-row">
+        <td colspan="8">{{account_group}}</td>
+      </tr>
+      {{#rows}}
+      <tr>
+        <td class="num">{{_index}}</td>
+        <td>{{txn_date}}</td>
+        <td>{{txn_id}}</td>
+        <td>{{description}}</td>
+        <td>{{department}}</td>
+        <td>{{gl_code}}</td>
+        <td class="num">{{debit_amount}}</td>
+        <td class="num">{{credit_amount}}</td>
+      </tr>
+      {{/rows}}
+      <tr class="grand-row">
+        <td></td>
+        <td colspan="5" class="label-cell">GRAND TOTAL:</td>
+        <td class="num">{{_totals.debit_amount}}</td>
+        <td class="num">{{_totals.credit_amount}}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">Debit Pattern (Rows in this page)</div>
+      <div
+        class="report-bar-chart"
+        data-labels="{{#rows}}{{_index}},{{/rows}}"
+        data-values="{{#rows}}{{#debit_amount}}{{debit_amount}}{{/debit_amount}}{{^debit_amount}}0{{/debit_amount}},{{/rows}}"
+      ></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">Debit vs Credit (Filtered preview scope)</div>
+      <div
+        class="report-pie-chart"
+        data-labels="Debit,Credit"
+        data-values="{{_totals.debit_amount}},{{_totals.credit_amount}}"
+      ></div>
+    </div>
+  </div>
+
+  <div class="gl-footer">
+    <span>FINANCE CONTROLLERS PACK</span>
+    <span>INTERNAL USE ONLY</span>
+    <span>Page {{page_number}} of {{total_pages}}</span>
+  </div>
+</div>

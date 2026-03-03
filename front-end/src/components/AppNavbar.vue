@@ -21,8 +21,8 @@ const navItems = [
 
 <template>
   <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
-    <div class="container-fluid">
-      <button class="btn btn-link text-white me-2 d-lg-none" @click="emit('toggle-sidebar')">
+    <div class="container-fluid px-4">
+      <button class="btn btn-link text-white me-3 d-lg-none" @click="emit('toggle-sidebar')">
         <i class="bi bi-list fs-4"></i>
       </button>
       <RouterLink class="navbar-brand d-flex align-items-center" to="/">
@@ -55,34 +55,35 @@ const navItems = [
 </template>
 
 <style scoped>
-.navbar {
-  height: var(--pr-navbar-height);
-  background-color: var(--databricks-dark-blue) !important;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-}
-
-.navbar-brand {
-  font-size: 1.25rem;
-}
-
 .navbar-logo {
-  height: 28px;
+  height: 24px;
   width: auto;
+  /* Filter calculates to #FF3621 (Databricks Orange) from pure white */
+  filter: invert(36%) sepia(85%) saturate(3015%) hue-rotate(345deg) brightness(101%) contrast(105%);
 }
 
 .nav-link {
-  padding: 0.5rem 1rem !important;
-  border-radius: 6px;
-  margin: 0 0.25rem;
-  transition: background 0.2s ease;
+  font-size: var(--ep-text-sm);
+  padding: 6px 12px !important;
+  border-radius: var(--ep-radius-sm);
+  margin: 0 4px;
+  transition: all var(--trans-fast);
+  color: var(--ep-text-secondary) !important;
+  font-weight: 500;
+}
+
+.nav-link i {
+  font-size: 14px;
+  opacity: 0.7;
 }
 
 .nav-link:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: var(--ep-bg-surface-hover);
+  color: var(--ep-text-primary) !important;
 }
 
 .nav-link.active {
-  background: rgba(255, 255, 255, 0.2);
-  font-weight: 500;
+  background: var(--ep-bg-surface-active);
+  color: var(--ep-text-primary) !important;
 }
 </style>

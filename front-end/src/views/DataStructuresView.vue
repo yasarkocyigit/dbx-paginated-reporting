@@ -14,8 +14,8 @@ import {
   listSchemasApiV1DiscoveryCatalogsCatalogSchemasGet,
   listTablesApiV1DiscoveryCatalogsCatalogSchemasSchemaTablesGet,
   getTableColumnsApiV1DiscoveryCatalogsCatalogSchemasSchemaTablesTableColumnsGet,
-} from '@/api/generated'
-import type { CatalogInfo, SchemaInfo, TableInfo, ColumnInfo, StructureTable, StructureFieldOutput } from '@/api/generated'
+} from '@/api/client'
+import type { CatalogInfo, SchemaInfo, TableInfo, ColumnInfo, StructureTable, StructureFieldOutput } from '@/api/client'
 
 const queryClient = useQueryClient()
 const dataStore = useDataStructuresStore()

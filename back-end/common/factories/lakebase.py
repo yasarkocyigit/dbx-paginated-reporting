@@ -24,6 +24,7 @@ from migrations import (
     CREATE_APP_SCHEMA,
     CREATE_STRUCTURES_TABLE,
     CREATE_TEMPLATES_TABLE,
+    ALTER_TEMPLATES_ADD_DEFINITION_JSON,
     CREATE_TEMPLATES_INDEXES,
     SEED_STRUCTURES,
     SEED_TEMPLATES,
@@ -126,9 +127,14 @@ class LakebaseFactory:
 
     # -- migration helpers -----------------------------------------------
 
-    async def _run_migration(self, table_name: str, create_sql: str,
-                              index_sql: str | None = None,
-                              seed_sql: str | None = None) -> None:
+    async def _run_migration(
+        self,
+        table_name: str,
+        create_sql: str,
+        index_sql: str | None = None,
+        seed_sql: str | None = None,
+        seed_when_exists: bool = False,
+    ) -> None:
         """Generic helper to create a table, optional indexes, and optional seed data."""
         try:
             check_result = await self.connector.execute_query(
@@ -140,6 +146,9 @@ class LakebaseFactory:
 
             if table_count and table_count > 0:
                 L.info(f"{table_name} table already exists — skipping migration")
+                if seed_sql and seed_when_exists:
+                    result = await self.connector.execute_query(seed_sql)
+                    L.info(f"SEED {table_name} (existing table) result: rowcount={result.rowcount}")
                 return
 
             L.info(f"{table_name} table not found — running migration")
@@ -179,6 +188,7 @@ class LakebaseFactory:
             "structures",
             CREATE_STRUCTURES_TABLE,
             seed_sql=SEED_STRUCTURES,
+            seed_when_exists=True,
         )
 
     async def _ensure_templates_table(self) -> None:
@@ -187,7 +197,25 @@ class LakebaseFactory:
             CREATE_TEMPLATES_TABLE,
             index_sql=CREATE_TEMPLATES_INDEXES,
             seed_sql=SEED_TEMPLATES,
+            seed_when_exists=True,
         )
+        try:
+            privilege_check = await self.connector.execute_query(
+                "SELECT (pg_catalog.pg_get_userbyid(c.relowner) = current_user) AS is_owner "
+                "FROM pg_catalog.pg_class c "
+                "JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace "
+                "WHERE n.nspname = current_schema() AND c.relname = 'templates'"
+            )
+            can_alter = bool(privilege_check.scalar())
+            if not can_alter:
+                L.warning("Skipping templates.definition_json migration: no ALTER privilege on templates table")
+                return
+
+            await self.connector.execute_query(ALTER_TEMPLATES_ADD_DEFINITION_JSON)
+            L.info("templates.definition_json column ensured")
+        except Exception as e:
+            L.error(f"Error ensuring templates.definition_json: {e}")
+            L.warning("Application will continue without definition_json support")
 
     async def _ensure_conversation_messages_table(self) -> None:
         await self._run_migration(

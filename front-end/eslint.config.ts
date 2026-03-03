@@ -5,6 +5,14 @@ import pluginVue from "eslint-plugin-vue";
 import { defineConfig } from "eslint/config";
 
 export default defineConfig([
+  {
+    ignores: [
+      "dist/**",
+      "openapi.json",
+      "src/api/generated/**",
+      "src/api/client.ts",
+    ],
+  },
   { files: ["**/*.{js,mjs,cjs,ts,mts,cts,vue}"], plugins: { js }, extends: ["js/recommended"], languageOptions: { globals: globals.browser } },
   tseslint.configs.recommended,
   pluginVue.configs["flat/essential"],

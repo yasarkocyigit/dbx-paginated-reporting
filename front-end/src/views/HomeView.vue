@@ -10,74 +10,76 @@ function navigate(path: string) {
 
 <template>
   <div class="home-view">
-    <div class="text-center mb-5">
-      <h1 class="display-4 fw-bold mb-3">
-        <i class="bi bi-file-earmark-richtext text-primary me-3"></i>
+    <div class="hero-section text-center">
+      <div class="hero-badge mb-3">
+        <span class="badge-text">Reporting Engine V1.0</span>
+      </div>
+      <h1 class="hero-title fw-bold mb-3">
         Paginated Reporting
       </h1>
-      <p class="lead text-muted">
+      <p class="hero-subtitle">
         Create beautiful, data-driven reports with dynamic templates and PDF export
       </p>
     </div>
 
-    <div class="row g-4 mb-5">
+    <div class="row g-4 mb-5 mt-2">
       <div class="col-md-4">
-        <div class="card h-100 border-0 shadow-sm">
-          <div class="card-body text-center p-4">
-            <div class="feature-icon bg-primary bg-gradient text-white rounded-circle mb-3 mx-auto">
-              <i class="bi bi-diagram-3 fs-3"></i>
+        <div class="card h-100">
+          <div class="card-body p-4">
+            <div class="feature-icon mb-3">
+              <i class="bi bi-diagram-3"></i>
             </div>
-            <h5 class="card-title">Define Data Structures</h5>
-            <p class="card-text text-muted">
+            <h5 class="card-title fw-semibold">Define Data Structures</h5>
+            <p class="card-text text-muted mb-4">
               Create flexible data models with support for nested arrays and objects
             </p>
-            <button class="btn btn-outline-primary" @click="navigate('/data-structures')">
-              <i class="bi bi-arrow-right me-1"></i>
+            <button class="btn btn-primary w-100" @click="navigate('/data-structures')">
               Get Started
+              <i class="bi bi-arrow-right ms-1"></i>
             </button>
           </div>
         </div>
       </div>
 
       <div class="col-md-4">
-        <div class="card h-100 border-0 shadow-sm">
-          <div class="card-body text-center p-4">
-            <div class="feature-icon bg-success bg-gradient text-white rounded-circle mb-3 mx-auto">
-              <i class="bi bi-code-square fs-3"></i>
+        <div class="card h-100">
+          <div class="card-body p-4">
+            <div class="feature-icon mb-3">
+              <i class="bi bi-code-square"></i>
             </div>
-            <h5 class="card-title">Build Templates</h5>
-            <p class="card-text text-muted">
+            <h5 class="card-title fw-semibold">Build Templates</h5>
+            <p class="card-text text-muted mb-4">
               Design HTML templates with mustache syntax and live preview
             </p>
-            <button class="btn btn-outline-success" @click="navigate('/template-editor')">
-              <i class="bi bi-arrow-right me-1"></i>
+            <button class="btn w-100" @click="navigate('/template-editor')">
               Create Template
+              <i class="bi bi-arrow-right ms-1"></i>
             </button>
           </div>
         </div>
       </div>
 
       <div class="col-md-4">
-        <div class="card h-100 border-0 shadow-sm">
-          <div class="card-body text-center p-4">
-            <div class="feature-icon bg-danger bg-gradient text-white rounded-circle mb-3 mx-auto">
-              <i class="bi bi-file-pdf fs-3"></i>
+        <div class="card h-100">
+          <div class="card-body p-4">
+            <div class="feature-icon mb-3">
+              <i class="bi bi-file-pdf"></i>
             </div>
-            <h5 class="card-title">Export to PDF</h5>
-            <p class="card-text text-muted">
+            <h5 class="card-title fw-semibold">Export to PDF</h5>
+            <p class="card-text text-muted mb-4">
               Generate professional PDF reports with pagination support
             </p>
-            <button class="btn btn-outline-danger" @click="navigate('/preview')">
-              <i class="bi bi-arrow-right me-1"></i>
+            <button class="btn btn-export w-100" @click="navigate('/preview')">
               Preview & Export
+              <i class="bi bi-arrow-right ms-1"></i>
             </button>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="card border-0 shadow-sm">
-      <div class="card-header bg-white py-3">
+    <div class="card">
+      <div class="card-header">
         <h5 class="mb-0">
           <i class="bi bi-lightbulb text-warning me-2"></i>
           Quick Start Guide
@@ -139,35 +141,85 @@ function navigate(path: string) {
 .home-view {
   max-width: 1000px;
   margin: 0 auto;
+  padding-top: 2rem;
+}
+
+/* Premium Hero Section */
+.hero-section {
+  margin-bottom: 4rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  background: var(--ep-bg-surface-active);
+  border: 1px solid var(--ep-border-strong);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+}
+
+.badge-text {
+  font-size: var(--ep-text-xs);
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ep-text-secondary);
+}
+
+.hero-title {
+  font-size: 3.5rem;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  color: var(--ep-text-primary);
+  /* Optional subtle gradient text */
+  background: linear-gradient(180deg, var(--ep-text-primary) 0%, var(--ep-text-secondary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: 1.125rem;
+  color: var(--ep-text-secondary);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
 }
 
 .feature-icon {
-  width: 64px;
-  height: 64px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
+  border: 1px solid var(--ep-border-base);
+  border-radius: var(--ep-radius-sm);
+  background: var(--ep-bg-surface);
+  box-shadow: var(--ep-shadow-sm);
+}
+
+.feature-icon i {
+  font-size: 20px;
+  color: var(--ep-text-primary);
 }
 
 .step-number {
-  width: 32px;
-  height: 32px;
-  background: linear-gradient(135deg, var(--pr-primary) 0%, var(--pr-secondary) 100%);
-  color: white;
-  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  background: var(--ep-bg-surface);
+  border: 1px solid var(--ep-border-base);
+  color: var(--ep-text-primary);
+  border-radius: var(--ep-radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 600;
   flex-shrink: 0;
-}
-
-.card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12) !important;
+  box-shadow: var(--ep-shadow-sm);
+  font-size: var(--ep-text-xs);
 }
 </style>

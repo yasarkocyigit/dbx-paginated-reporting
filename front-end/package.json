@@ -10,7 +10,7 @@
     "lint": "eslint . --report-unused-disable-directives --max-warnings 0",
     "lint:fix": "eslint . --fix",
     "type-check": "tsc --noEmit",
-    "generate-spec": "curl -sf http://127.0.0.1:8000/openapi.json -o openapi.json",
+    "generate-spec": "curl -sf ${OPENAPI_URL:-http://127.0.0.1:8000/openapi.json} -o openapi.json",
     "generate-all": "npm run generate-spec && orval"
   },
   "dependencies": {

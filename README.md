@@ -65,7 +65,13 @@ npm install
 npm run dev
 ```
 
-The front-end proxies `/api` requests to `http://localhost:8000` in development.
+By default, the front-end proxies `/api` requests to `http://localhost:8000` in development.
+
+If your backend runs on a different port (for example `8001`), set:
+
+```bash
+VITE_API_PROXY_TARGET=http://localhost:8001 npm run dev
+```
 
 ### Regenerate API Client
 
@@ -74,6 +80,13 @@ When backend routes change, regenerate the typed API client:
 ```bash
 cd front-end
 npm run generate-all
+```
+
+If backend runs on a non-default port, pass the OpenAPI URL explicitly:
+
+```bash
+cd front-end
+OPENAPI_URL=http://127.0.0.1:8001/openapi.json npm run generate-all
 ```
 
 ## Architecture
@@ -179,6 +192,13 @@ Use `.report-page` divs and `<!-- PAGE BREAK -->` comments (available in the Ins
 ### Step 3 — Preview & Export
 
 Navigate to **Preview** and select your template from the dropdown. The app fetches real data from your Databricks SQL warehouse, renders it through the template, and displays the paginated result.
+
+Use **Page Setup** controls to adjust:
+- paper size (A4/Letter)
+- orientation (portrait/landscape)
+- print margin (mm)
+- density (compact/comfortable)
+- deterministic row pagination (`Paginate rows` + `rows per page`)
 
 Click **Export / Print PDF** to open the browser print dialog. Print media styles hide the toolbar so only the report content is printed. Configure your browser to print to PDF for a clean output.
 
