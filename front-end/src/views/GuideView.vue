@@ -5,11 +5,14 @@ const activeSection = ref('mustache')
 
 const sections = [
   { id: 'mustache',          label: 'Mustache Syntax',    icon: 'bi-braces' },
+  { id: 'editor-modes',      label: 'Editor Modes',       icon: 'bi-window-split' },
+  { id: 'runtime-preview',   label: 'Runtime Preview',    icon: 'bi-sliders' },
   { id: 'flat-table',        label: 'Flat Table',          icon: 'bi-table' },
   { id: 'struct',            label: 'Struct Fields',       icon: 'bi-braces-asterisk' },
   { id: 'array-struct',      label: 'Array of Structs',    icon: 'bi-list-nested' },
   { id: 'chart-struct',      label: 'Charts from Structs', icon: 'bi-bar-chart' },
   { id: 'conditional-styles',label: 'Conditional Styles',  icon: 'bi-palette' },
+  { id: 'reliability',       label: 'Reliability Notes',   icon: 'bi-shield-check' },
 ]
 
 // ── Inline syntax tags ────────────────────────────────────────────────────────
@@ -356,6 +359,47 @@ FROM procurement.suppliers`,
   </div>
 </div>
 {{/rows}}`,
+
+  runtime_preview_request: `POST /api/v1/templates/{template_id}/preview-data
+{
+  "limit": 50,
+  "offset": 0,
+  "filters": [
+    { "field": "department", "operator": "equals", "value": "2-HIGH" },
+    { "field": "debit_amount", "operator": "gte", "value": 0 }
+  ],
+  "group_by": "department",
+  "sorts": [
+    { "field": "txn_date", "direction": "desc" }
+  ]
+}`,
+
+  runtime_preview_response: `{
+  "data": { "rows": [ ... ] },
+  "executed_query": "SELECT * FROM (...) _q WHERE ... ORDER BY ... LIMIT 50",
+  "filter_debug": {
+    "where_clause": "...",
+    "order_by_clause": "...",
+    "applied_filters": [ ... ],
+    "applied_sorts": [ ... ],
+    "limit": 50,
+    "offset": 0
+  },
+  "row_count": 50
+}`,
+
+  runtime_export_pattern: `// export flow (frontend)
+offset = 0
+while (offset < MAX_EXPORT_ROWS):
+  chunk = preview-data(limit=5000, offset=offset)
+  append(chunk.rows)
+  if chunk.rows.length < 5000: break
+  offset += chunk.rows.length`,
+
+  optimistic_locking_pattern: `-- recommended enterprise hardening
+UPDATE templates
+SET html_content = :html, updated_at = NOW()
+WHERE id = :id AND updated_at = :last_seen_updated_at;`,
 }
 </script>
 
@@ -452,6 +496,83 @@ FROM procurement.suppliers`,
               <p class="mb-2">Every query returns a single top-level key <code>rows</code>, which is a list of objects:</p>
               <pre class="code-block">{{ code.dataShape }}</pre>
               <p class="mb-0 small text-muted mt-2">Each row also receives <code>{{ t.index }}</code> (1-based position) and <code>{{ t.total }}</code> (total row count) automatically.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Editor Modes ── -->
+        <div v-if="activeSection === 'editor-modes'">
+          <h4 class="section-title"><i class="bi bi-window-split me-2 text-primary"></i>Editor Modes</h4>
+          <p class="text-muted">Template Editor supports both metadata-first and advanced code-first authoring. Use the right mode for the report lifecycle stage.</p>
+
+          <div class="pattern-card mb-4">
+            <div class="pattern-header pattern-1">Designer Mode</div>
+            <div class="card-body">
+              <ul class="mb-3">
+                <li>Best for business-first layout editing and parameter modeling.</li>
+                <li>Backed by designer metadata (<code>definition_json</code> / embedded designer meta block).</li>
+                <li>Supports column management, totals, group-by, sort rules, and parameter declarations.</li>
+              </ul>
+              <div class="alert alert-info mb-0">
+                <i class="bi bi-info-circle me-2"></i>
+                If designer metadata exists, the template opens in Designer mode by default.
+              </div>
+            </div>
+          </div>
+
+          <div class="pattern-card mb-4">
+            <div class="pattern-header pattern-2">HTML Advanced Mode</div>
+            <div class="card-body">
+              <ul class="mb-3">
+                <li>Best for pixel-perfect control and complex Mustache logic.</li>
+                <li>Allows direct editing of HTML/CSS with full Mustache sections.</li>
+                <li>Recommended for SSRS-like custom styling and print tuning.</li>
+              </ul>
+              <div class="alert alert-success mb-0">
+                <i class="bi bi-check-circle-fill me-2"></i>
+                Non-designer templates open in HTML mode automatically to avoid generic fallback layout rendering.
+              </div>
+            </div>
+          </div>
+
+          <div class="pattern-card">
+            <div class="pattern-header pattern-3">Autosave and Safety Behavior</div>
+            <div class="card-body">
+              <ul class="mb-3">
+                <li>Autosave is debounced and tied to the active template snapshot.</li>
+                <li>When switching templates, stale pending saves are discarded.</li>
+                <li>This prevents cross-template content overwrite during fast navigation.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Runtime Preview ── -->
+        <div v-if="activeSection === 'runtime-preview'">
+          <h4 class="section-title"><i class="bi bi-sliders me-2 text-primary"></i>Runtime Preview and Filter Pipeline</h4>
+          <p class="text-muted">Preview applies runtime parameter values to backend query filters, then renders real Databricks data with debug trace visibility.</p>
+
+          <div class="pattern-step">
+            <div class="step-label">Preview Request Payload</div>
+            <pre class="code-block">{{ code.runtime_preview_request }}</pre>
+          </div>
+
+          <div class="pattern-step">
+            <div class="step-label">Preview Response and Debug Trace</div>
+            <pre class="code-block">{{ code.runtime_preview_response }}</pre>
+          </div>
+
+          <div class="alert alert-info mb-4">
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Debug panel values come directly from backend query planning:</strong>
+            <code>where_clause</code>, <code>order_by_clause</code>, and executed SQL are exposed for fast validation.
+          </div>
+
+          <div class="pattern-card">
+            <div class="pattern-header pattern-2">Export Strategy (Full Dataset)</div>
+            <div class="card-body">
+              <p class="small text-muted mb-3">Export fetches data in chunks (limit + offset) instead of relying on preview-sized batches.</p>
+              <pre class="code-block">{{ code.runtime_export_pattern }}</pre>
             </div>
           </div>
         </div>
@@ -699,6 +820,38 @@ FROM procurement.suppliers`,
                 </tbody>
               </table>
             </div>
+          </div>
+        </div>
+
+        <!-- ── Reliability Notes ── -->
+        <div v-if="activeSection === 'reliability'">
+          <h4 class="section-title"><i class="bi bi-shield-check me-2 text-primary"></i>Reliability Notes</h4>
+          <p class="text-muted">Current safeguards and recommended enterprise hardening items.</p>
+
+          <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-check2-square me-2 text-success"></i>Implemented Safeguards</div>
+            <div class="card-body">
+              <ul class="mb-0">
+                <li>Template identity is UUID-based and consistent across views.</li>
+                <li>Template autosave uses request sequencing and snapshot guards.</li>
+                <li>Preview requests use sequence guards to avoid stale response overwrites.</li>
+                <li>Parameter option loading is dependency-aware and race-safe.</li>
+                <li>Pagination query behavior is deterministic when explicit sort is absent.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="card mb-4">
+            <div class="card-header"><i class="bi bi-lightning-charge me-2 text-warning"></i>Recommended Hardening (Next Step)</div>
+            <div class="card-body">
+              <p class="mb-2">For multi-editor concurrency, add optimistic locking at API update boundaries:</p>
+              <pre class="code-block">{{ code.optimistic_locking_pattern }}</pre>
+            </div>
+          </div>
+
+          <div class="alert alert-primary mb-0">
+            <i class="bi bi-robot me-2"></i>
+            <strong>AI endpoint note:</strong> Assistant responses are served through Databricks Model Serving endpoint configuration (<code>MODEL_SERVING_ENDPOINT</code>).
           </div>
         </div>
 
